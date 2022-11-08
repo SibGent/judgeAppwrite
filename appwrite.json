@@ -1,0 +1,20 @@
+{
+    "projectId": "635e40a7de325b257b1c",
+    "projectName": "sportapp",
+    "functions": [
+        {
+            "$id": "636a25e7aa086f73ba26",
+            "name": "getUserList",
+            "runtime": "php-8.0",
+            "path": "functions/getUserList",
+            "entrypoint": "src/index.php",
+            "ignore": [
+                "vendor"
+            ],
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
+        }
+    ]
+}
