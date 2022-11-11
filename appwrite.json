@@ -15,6 +15,20 @@
             "events": [],
             "schedule": "",
             "timeout": 15
+        },
+        {
+            "$id": "636e791a222d6cc8a3f1",
+            "name": "onCreateSession",
+            "runtime": "php-8.0",
+            "path": "functions/onCreateSession",
+            "entrypoint": "src/index.php",
+            "ignore": [
+                "vendor"
+            ],
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
         }
     ]
 }
