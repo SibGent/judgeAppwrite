@@ -57,7 +57,7 @@ return function($req, $res) {
   $collectionId = "63620f139fa54f3c5754"; // competitor
   
   $payload = $req['payload'];
-  
+
   $mas = json_decode($payload, true);
   $sessionId = $mas['sessionId'];
   $data = base64_decode($mas['data']);
@@ -66,24 +66,30 @@ return function($req, $res) {
   array_shift($lines);
   
   $competitors = [];
+  try {
+    foreach ($lines as $line) {
+      $data = str_getcsv($line);
+      if (count($data) < 4) {
+        continue;
+      }
 
-  foreach ($lines as $line) {
-    $data = str_getcsv($line);
+      $number = intval($data[0]);
+      $name = trim($data[1]);
+      $discipline = trim($data[2]);
+      $age = trim($data[3]);
     
-    $number = $data[0];
-    $name = trim($data[1]);
-    $discipline = trim($data[2]);
-    $age = trim($data[3]);
-  
-    $result = $database->createDocument($databaseId, $collectionId, 'unique()', [
-      'sessionId' => $sessionId,
-      'number' => $number,
-      'name' => $name,
-      'discipline' => $discipline,
-      'age' => $age,
-    ]);
-  
-    $competitors[] = $result;
+      $result = $database->createDocument($databaseId, $collectionId, 'unique()', [
+        'sessionId' => $sessionId,
+        'number' => $number,
+        'name' => $name,
+        'discipline' => $discipline,
+        'age' => $age,
+      ]);
+    
+      $competitors[] = $result;
+    }
+  } catch (AppwriteException $e) {
+    var_dump($e->getMessage());
   }
   
   $res->json([
