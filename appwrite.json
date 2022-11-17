@@ -29,6 +29,20 @@
             "events": [],
             "schedule": "",
             "timeout": 15
+        },
+        {
+            "$id": "637642f1bb0035a1dbeb",
+            "name": "batchCompetitorCreate",
+            "runtime": "php-8.0",
+            "path": "functions/batchCompetitorCreate",
+            "entrypoint": "src/index.php",
+            "ignore": [
+                "vendor"
+            ],
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
         }
     ]
 }
