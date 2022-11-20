@@ -77,6 +77,7 @@ return function($req, $res) {
       $name = trim($data[1]);
       $discipline = trim($data[2]);
       $age = trim($data[3]);
+      $city = trim($data[4]);
     
       $result = $database->createDocument($databaseId, $collectionId, 'unique()', [
         'sessionId' => $sessionId,
@@ -84,6 +85,7 @@ return function($req, $res) {
         'name' => $name,
         'discipline' => $discipline,
         'age' => $age,
+        'city' => $city,
       ]);
     
       $competitors[] = $result;
