@@ -10,6 +10,18 @@ function getUserNames($juryNameList, $userId) {
     return $userId;
 }
 
+function getNamesByIds($juryNameList, $ids) {
+    $names = [];
+
+    foreach ($juryNameList as $user) {
+        if (in_array($user['$id'], $ids)) {
+            $names[] = $user['name'];
+        }
+    }
+
+    return $names;
+}
+
 function searchScore($array, $competitorId, $judgeId) {
     $value = 0.0;
 

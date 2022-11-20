@@ -77,6 +77,9 @@ return function($req, $res) {
   $juryNameList = $users->list([
     Query::equal('$id', array_merge($judgeListIds, $arbitratorListIds)),
   ]);
+
+  $judgeNames = getNamesByIds($juryNameList['users'], $judgeListIds);
+  $arbitratorNames = getNamesByIds($juryNameList['users'], $arbitratorListIds);
   
   $out = [];
   
@@ -112,10 +115,6 @@ return function($req, $res) {
       'name' => $name,
       'discipline' => $discipline,
       'age' => $age,
-      // 'scores' => $scores,
-      // 'deduction' => $deduction,
-      // 'total' => $total,
-      // 'place' => $place,
     ];
 
     foreach ($scores as $key => $value) {
@@ -145,25 +144,11 @@ return function($req, $res) {
     $place++;
   }
     
-  // $headerStart = ['№', 'Фамилия Имя', 'Дисциплина', 'Возраст'];
-  // $headerJudge = array_values($out[0]['scores']);
-  // $headerArbitrator = array_values($out[0]['deduction']);
-  // $headerEnd = ['Общий балл', 'Место'];
-
-  // $header = array_merge($headerStart, $headerJudge, $headerArbitrator, $headerEnd);
-
-  // var_dump($header);
-  var_dump($out);
-
-  // var_dump($headerJudge);
-  // echo PHP_EOL;
-  // var_dump($headerArbitrator);
-
-  // $books = [
-  //   ['ISBN', 'title', 'author', 'publisher', 'ctry' ],
-  //   [618260307, 'The Hobbit', 'J. R. R. Tolkien', 'Houghton Mifflin', 'USA'],
-  //   [908606664, 'Slinky Malinki', 'Lynley Dodd', 'Mallinson Rendel', 'NZ']
-  // ];
+  $headerStart = ['№', 'Фамилия Имя', 'Дисциплина', 'Возраст'];
+  $headerEnd = ['Общий балл', 'Место'];
+  $header = array_merge($headerStart, $judgeNames, $arbitratorNames, $headerEnd);
+  
+  array_unshift($out, $header);
 
   $xlsx = Shuchkin\SimpleXLSXGen::fromArray( $out );
   $xlsx->saveAs('books.xlsx');
@@ -171,7 +156,5 @@ return function($req, $res) {
 
   $res->json([
     'areDevelopersAwesome' => true,
-    // 'userList' => $userList,
-    // 'result' => $result,
   ]);
 };
