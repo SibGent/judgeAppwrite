@@ -59,7 +59,6 @@ return function($req, $res) {
 
   $payload = $database->createDocument($databaseId, $collesionId, $sessionId, [
     'competitorId' => NULL,
-    'competitorData' => NULL,
   ]);
 
   $res->json([

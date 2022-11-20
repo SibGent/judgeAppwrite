@@ -26,7 +26,9 @@
                 "vendor"
             ],
             "execute": [],
-            "events": [],
+            "events": [
+                "databases.6361668457d4ac7662fe.collections.6361670a04b612e88077.documents.*.create"
+            ],
             "schedule": "",
             "timeout": 15
         },
