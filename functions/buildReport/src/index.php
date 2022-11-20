@@ -92,29 +92,28 @@ return function($req, $res) {
     $place = 0;
       
     foreach ($judgeListIds as $judgeId) {
-      $name = getUserNames($juryNameList['users'], $judgeId);
+      $judgeName = getUserNames($juryNameList['users'], $judgeId);
       $value = searchScore($scoreList['documents'], $id, $judgeId);
 
-      $scores[$name] = $value;
+      $scores[$judgeName] = $value;
     }
 
     foreach ($arbitratorListIds as $arbitratorId) {
-      $name = getUserNames($juryNameList['users'], $arbitratorId);
+      $arbitratorName = getUserNames($juryNameList['users'], $arbitratorId);
       $value = searchDeduction($deductionList['documents'], $id, $arbitratorId);
 
-      $deduction[$name] = $value;
+      $deduction[$arbitratorName] = $value;
     }
   
     $total = sumTotal($scores, $deduction);
 
     $out[] = [
-      'id' => $id,
-      'numder' => $number,
+      'number' => $number,
       'name' => $name,
       'discipline' => $discipline,
       'age' => $age,
-      'scores' => $scores,
-      'deduction' => $deduction,
+      'scores' => array_values($scores),
+      'deduction' => array_values($deduction),
       'total' => $total,
       'place' => $place,
     ];
@@ -136,7 +135,18 @@ return function($req, $res) {
     $place++;
   }
     
-  var_dump($out);
+  $headerStart = ['№', 'Фамилия Имя', 'Дисциплина', 'Возраст'];
+  $headerJudge = array_keys($out[0]['scores']);
+  $headerArbitrator = array_keys($out[0]['deduction']);
+  $headerEnd = ['Общий балл', 'Место'];
+
+  $header = array_merge($headerStart, $headerJudge, $headerArbitrator, $headerEnd);
+
+  // var_dump($out);
+
+  // var_dump($headerJudge);
+  // echo PHP_EOL;
+  // var_dump($headerArbitrator);
 
   // $books = [
   //   ['ISBN', 'title', 'author', 'publisher', 'ctry' ],
@@ -144,9 +154,9 @@ return function($req, $res) {
   //   [908606664, 'Slinky Malinki', 'Lynley Dodd', 'Mallinson Rendel', 'NZ']
   // ];
 
-  // $xlsx = Shuchkin\SimpleXLSXGen::fromArray( $out );
-  // $xlsx->saveAs('books.xlsx');
-  // $result = $storage->createFile('637922611c551cb7d2fb', 'unique()', InputFile::withPath('books.xlsx'));
+  $xlsx = Shuchkin\SimpleXLSXGen::fromArray( $out );
+  $xlsx->saveAs('books.xlsx');
+  $result = $storage->createFile('637922611c551cb7d2fb', 'unique()', InputFile::withPath('books.xlsx'));
 
   $res->json([
     'areDevelopersAwesome' => true,
