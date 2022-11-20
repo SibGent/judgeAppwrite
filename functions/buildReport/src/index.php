@@ -112,11 +112,22 @@ return function($req, $res) {
       'name' => $name,
       'discipline' => $discipline,
       'age' => $age,
-      'scores' => $scores,
-      'deduction' => $deduction,
-      'total' => $total,
-      'place' => $place,
+      // 'scores' => $scores,
+      // 'deduction' => $deduction,
+      // 'total' => $total,
+      // 'place' => $place,
     ];
+
+    foreach ($scores as $key => $value) {
+      $out[count($out) - 1][$key] = $value;
+    }
+
+    foreach ($deduction as $key => $value) {
+      $out[count($out) - 1][$key] = $value;
+    }
+
+    $out[count($out) - 1]['total'] = $total;
+    $out[count($out) - 1]['place'] = $place;
   }
   
   uasort($out, function($a, $b) {
@@ -126,7 +137,6 @@ return function($req, $res) {
 
     return $a['total'] < $b['total'] ? 1 : -1;
   });
-
   $out  = array_values($out);
   
   $place = 1;
@@ -135,14 +145,14 @@ return function($req, $res) {
     $place++;
   }
     
-  $headerStart = ['№', 'Фамилия Имя', 'Дисциплина', 'Возраст'];
-  $headerJudge = array_values($out[0]['scores']);
-  $headerArbitrator = array_values($out[0]['deduction']);
-  $headerEnd = ['Общий балл', 'Место'];
+  // $headerStart = ['№', 'Фамилия Имя', 'Дисциплина', 'Возраст'];
+  // $headerJudge = array_values($out[0]['scores']);
+  // $headerArbitrator = array_values($out[0]['deduction']);
+  // $headerEnd = ['Общий балл', 'Место'];
 
-  $header = array_merge($headerStart, $headerJudge, $headerArbitrator, $headerEnd);
+  // $header = array_merge($headerStart, $headerJudge, $headerArbitrator, $headerEnd);
 
-  var_dump($header);
+  // var_dump($header);
   var_dump($out);
 
   // var_dump($headerJudge);
