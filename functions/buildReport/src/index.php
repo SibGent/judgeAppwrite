@@ -112,8 +112,8 @@ return function($req, $res) {
       'name' => $name,
       'discipline' => $discipline,
       'age' => $age,
-      'scores' => array_values($scores),
-      'deduction' => array_values($deduction),
+      'scores' => $scores,
+      'deduction' => $deduction,
       'total' => $total,
       'place' => $place,
     ];
@@ -136,13 +136,14 @@ return function($req, $res) {
   }
     
   $headerStart = ['№', 'Фамилия Имя', 'Дисциплина', 'Возраст'];
-  $headerJudge = array_keys($out[0]['scores']);
-  $headerArbitrator = array_keys($out[0]['deduction']);
+  $headerJudge = array_values($out[0]['scores']);
+  $headerArbitrator = array_values($out[0]['deduction']);
   $headerEnd = ['Общий балл', 'Место'];
 
   $header = array_merge($headerStart, $headerJudge, $headerArbitrator, $headerEnd);
 
-  // var_dump($out);
+  var_dump($header);
+  var_dump($out);
 
   // var_dump($headerJudge);
   // echo PHP_EOL;
