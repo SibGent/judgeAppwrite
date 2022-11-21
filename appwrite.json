@@ -59,6 +59,22 @@
             "events": [],
             "schedule": "",
             "timeout": 15
+        },
+        {
+            "$id": "637b5e7c4342632f4101",
+            "name": "batchJudgeCreate",
+            "runtime": "php-8.0",
+            "path": "functions/batchJudgeCreate",
+            "entrypoint": "src/index.php",
+            "ignore": [
+                "vendor"
+            ],
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
         }
     ]
 }
