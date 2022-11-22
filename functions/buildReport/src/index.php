@@ -54,106 +54,79 @@ return function($req, $res) {
       ->setSelfSigned(true);
   }
 
-  $sessionId = '6374a0530cecab0cf787';
   $databaseId = '6361668457d4ac7662fe';
-
-  $session = $database->getDocument($databaseId, '6361670a04b612e88077', $sessionId);
+  $colSession = '6361670a04b612e88077';
+  $colCompetitor = '63620f139fa54f3c5754';
+  $colScore = '636fb027bc44b3b389b4';
+  $colDeduction = '6370d5eaf144b7909698';
+  $colJudge = '637aece8101af4477b11';
   
-  $judgeListIds = $session['judgeListIds'];
-  $arbitratorListIds = $session['arbitratorListIds'];
-
-  $competitorList = $database->listDocuments($databaseId, '63620f139fa54f3c5754', [
-    Query::equal('sessionId', $sessionId),
-  ]);
-
-  $scoreList = $database->listDocuments($databaseId, '636fb027bc44b3b389b4', [
-    Query::equal('sessionId', $sessionId),
-  ]);
-
-  $deductionList = $database->listDocuments($databaseId, '6370d5eaf144b7909698', [
-    Query::equal('sessionId', $sessionId),
-  ]);
-
-  $juryNameList = $users->list([
-    Query::equal('$id', array_merge($judgeListIds, $arbitratorListIds)),
-  ]);
-
-  $judgeNames = getNamesByIds($juryNameList['users'], $judgeListIds);
-  $arbitratorNames = getNamesByIds($juryNameList['users'], $arbitratorListIds);
+  $sessionId = '637b6e6709dc00c94feb';
+  
+  $session = $database->getDocument($databaseId, '6361670a04b612e88077', $sessionId);
+  $judgeIds = $session['judgeListIds'];
+  $arbitratorIds = $session['arbitratorListIds'];
+  
+  $competitorList = $database->listDocuments($databaseId, $colCompetitor, [
+      Query::equal('sessionId', $sessionId),
+  ])['documents'];
+  
+  $scoreList = $database->listDocuments($databaseId, $colScore, [
+      Query::equal('sessionId', $sessionId),
+  ])['documents'];
+  
+  $deductionList = $database->listDocuments($databaseId, $colDeduction, [
+      Query::equal('sessionId', $sessionId),
+  ])['documents'];
+  
+  $judgeList = $database->listDocuments($databaseId, $colJudge, [
+      Query::equal('sessionId', $sessionId),
+  ])['documents'];
   
   $out = [];
+  $judgeIds_A = getJudgeIds($judgeList, 'role', 'artistic');
+  $judgeIds_E = getJudgeIds($judgeList, 'role', 'execution');
+  $judgeIds_D = getJudgeIds($judgeList, 'role', 'difficulty');
   
-  foreach ($competitorList['documents'] as $doc) {
-    $id = $doc['$id'];
-    $number = $doc['number'];
-    $name = $doc['name'];
-    $discipline = $doc['discipline'];
-    $age = $doc['age'];
-    $scores = [];
-    $deduction = [];
-    $total = 0.0;
-    $place = 0;
-      
-    foreach ($judgeListIds as $judgeId) {
-      $judgeName = getUserNames($juryNameList['users'], $judgeId);
-      $value = searchScore($scoreList['documents'], $id, $judgeId);
-
-      $scores[$judgeName] = $value;
-    }
-
-    foreach ($arbitratorListIds as $arbitratorId) {
-      $arbitratorName = getUserNames($juryNameList['users'], $arbitratorId);
-      $value = searchDeduction($deductionList['documents'], $id, $arbitratorId);
-
-      $deduction[$arbitratorName] = $value;
-    }
-  
-    $total = sumTotal($scores, $deduction);
+  foreach ($competitorList as $competitor) {
+    $id = $competitor['$id'];
+    $number = $competitor['number'];
+    $name = $competitor['name'];
+    $city = $competitor['city'];
+    $scoreArtistic = getScore($scoreList, $judgeIds_A, $id);
+    $meanArtistic = getMeanScore($scoreArtistic);
+    $scoreExecution = getScore($scoreList, $judgeIds_E, $id);
+    $meanExecution = getMeanScore($scoreExecution);
+    $scoreDifficulty = getScore($scoreList, $judgeIds_D, $id);
+    $meanDifficulty = getMeanScore($scoreDifficulty);
+    $deduction = getDeduction($deductionList, $arbitratorIds, $id);
+    $total = getTotal($meanArtistic, $meanDifficulty, $meanExecution, $deduction);
 
     $out[] = [
       'number' => $number,
       'name' => $name,
-      'discipline' => $discipline,
-      'age' => $age,
+      'city' => $city,
+      'scoreArtistic' => $scoreArtistic,
+      'meanArtistic' => $meanArtistic,
+      'scoreExecution' => $scoreExecution,
+      'meanExecution' => $meanExecution,
+      'scoreDifficulty' => $scoreDifficulty,
+      'meanDifficulty' => $meanDifficulty,
+      'deduction' => $deduction,
+      'total' => $total,
     ];
-
-    foreach ($scores as $key => $value) {
-      $out[count($out) - 1][$key] = $value;
-    }
-
-    foreach ($deduction as $key => $value) {
-      $out[count($out) - 1][$key] = $value;
-    }
-
-    $out[count($out) - 1]['total'] = $total;
-    $out[count($out) - 1]['place'] = $place;
   }
   
-  uasort($out, function($a, $b) {
-    if ($a['total'] == $b['total']) {
-      return 0;
-    }
+  $out = sortByTotal($out);
 
-    return $a['total'] < $b['total'] ? 1 : -1;
-  });
-  $out  = array_values($out);
-  
   $place = 1;
   foreach ($out as $key => $value) {
-    $out[$key]['place'] = $place;
-    $place++;
+      $out[$key]['place'] = $place;
+      $place++;
   }
-    
-  $headerStart = ['№', 'Фамилия Имя', 'Дисциплина', 'Возраст'];
-  $headerEnd = ['Общий балл', 'Место'];
-  $header = array_merge($headerStart, $judgeNames, $arbitratorNames, $headerEnd);
+ 
+  var_dump($out);
   
-  array_unshift($out, $header);
-
-  $xlsx = Shuchkin\SimpleXLSXGen::fromArray( $out );
-  $xlsx->saveAs('books.xlsx');
-  $result = $storage->createFile('637922611c551cb7d2fb', 'unique()', InputFile::withPath('books.xlsx'));
-
   $res->json([
     'areDevelopersAwesome' => true,
   ]);

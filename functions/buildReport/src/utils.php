@@ -1,63 +1,65 @@
 <?php
+function getJudgeIds($array, $key, $keyValue): array
+{
+    $filter = array_filter($array, function($value) use ($key, $keyValue) {
+        return $value[$key] == $keyValue;
+    });
 
-function getUserNames($juryNameList, $userId) {
-    foreach ($juryNameList as $item) {
-        if ($item['$id'] == $userId) {
-            return $item['name'];
-        }
-    }
-
-    return $userId;
+    return array_column($filter, 'userId');
 }
 
-function getNamesByIds($juryNameList, $ids) {
-    $names = [];
+function getScore($score, $judgeIds, $competitorId): array
+{
+    $res = [];
 
-    foreach ($juryNameList as $user) {
-        if (in_array($user['$id'], $ids)) {
-            $names[] = $user['name'];
-        }
+    foreach ($judgeIds as $judgeId) {
+        $filter = array_filter($score, function($value) use ($judgeId, $competitorId) {
+            return $value['judgeId'] == $judgeId && $value['competitorId'] == $competitorId;
+        });
+        $value = array_column($filter, 'value')[0];
+
+        $res[$judgeId] = $value;
     }
 
-    return $names;
+return $res;
 }
 
-function searchScore($array, $competitorId, $judgeId) {
-    $value = 0.0;
+function getDeduction($deduction, $judgeIds, $competitorId): array
+{
+    $res = [];
 
-    foreach ($array as $key) {
-        if ($key['judgeId'] == $judgeId && $key['competitorId'] == $competitorId) {
-            $value = (float) $key['value'];
-            break;
-        }
+    foreach ($judgeIds as $judgeId) {
+        $filter = array_filter($deduction, function($value) use ($judgeId, $competitorId) {
+            return $value['arbitratorId'] == $judgeId && $value['competitorId'] == $competitorId;
+        });
+        $value = array_column($filter, 'value')[0];
+
+        $res[$judgeId] = $value;
     }
 
-    return $value;
+return $res;
 }
 
-function searchDeduction($array, $competitorId, $arbitratorId) {
-    $value = 0.0;
-
-    foreach ($array as $key) {
-        if ($key['arbitratorId'] == $arbitratorId && $key['competitorId'] == $competitorId) {
-            $value = (float) $key['value'];
-            break;
-        }
-    }
-
-    return $value;
+function getMeanScore($scores): float
+{
+    $values = array_values($scores);
+    return array_sum($values) / count($values);
 }
 
-function sumTotal($score, $deduction) {
-    $total = 0.0;
+function getTotal($meanArtistic, $meanDifficulty, $meanExecution, $deduction): float
+{
+    return $meanArtistic + $meanDifficulty + $meanExecution + array_sum(array_values($deduction));
+}
 
-    foreach ($score as $key => $value) {
-        $total += $value;
-    }
+function sortByTotal($out): array
+{
+    uasort($out, function($a, $b) {
+        if ($a['total'] == $b['total']) {
+            return 0;
+        }
 
-    foreach ($deduction as $key => $value) {
-        $total -= $value;
-    }
+        return $a['total'] < $b['total'] ? 1 : -1;
+    });
 
-    return $total;
+    return array_values($out);
 }
