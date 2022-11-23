@@ -75,6 +75,20 @@
             "events": [],
             "schedule": "",
             "timeout": 15
+        },
+        {
+            "$id": "637dc3dad5814f502bd8",
+            "name": "Excel",
+            "runtime": "python-3.9",
+            "path": "functions/Excel",
+            "entrypoint": "src/index.py",
+            "ignore": [
+                "__pypackages__"
+            ],
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
         }
     ]
 }
