@@ -1,15 +1,11 @@
 from appwrite.client import Client
-
-# You can remove imports of services you don't use
-from appwrite.services.account import Account
-from appwrite.services.avatars import Avatars
 from appwrite.services.databases import Databases
-from appwrite.services.functions import Functions
-from appwrite.services.health import Health
-from appwrite.services.locale import Locale
 from appwrite.services.storage import Storage
-from appwrite.services.teams import Teams
 from appwrite.services.users import Users
+
+from appwrite.query import Query
+
+from .utils import *
 
 """
   'req' variable has:
@@ -26,16 +22,8 @@ from appwrite.services.users import Users
 
 def main(req, res):
   client = Client()
-
-  # You can remove services you don't use
-  account = Account(client)
-  avatars = Avatars(client)
   database = Databases(client)
-  functions = Functions(client)
-  health = Health(client)
-  locale = Locale(client)
   storage = Storage(client)
-  teams = Teams(client)
   users = Users(client)
 
   if not req.variables.get('APPWRITE_FUNCTION_ENDPOINT') or not req.variables.get('APPWRITE_FUNCTION_API_KEY'):
@@ -49,20 +37,75 @@ def main(req, res):
       .set_self_signed(True)
     )
   
-  import xlsxwriter
-  workbook = xlsxwriter.Workbook('demo.xlsx')
-  worksheet = workbook.add_worksheet()
-  worksheet.set_column('A:A', 20)
-  bold = workbook.add_format({'bold': True})
-  worksheet.write('A1', 'Hello')
-  worksheet.write('A2', 'World', bold)
-  worksheet.write(2, 0, 123)
-  worksheet.write(3, 0, 123.456)
-  workbook.close()
-  
-  from appwrite.input_file import InputFile
-  result = storage.create_file('637922611c551cb7d2fb', 'unique()', InputFile.from_path('demo.xlsx'))
-  
+  databaseId = '6361668457d4ac7662fe'
+  colSession = '6361670a04b612e88077'
+  colCompetitor = '63620f139fa54f3c5754'
+  colScore = '636fb027bc44b3b389b4'
+  colDeduction = '6370d5eaf144b7909698'
+  colJudge = '637aece8101af4477b11'
+
+  sessionId = '637b6e6709dc00c94feb'
+
+  # read from database
+  session = database.get_document(databaseId, colSession, sessionId)
+  judgeIds = session['judgeListIds']
+  arbitratorIds = session['arbitratorListIds']
+
+  equalSessionId = [Query.equal('sessionId', sessionId)]
+  competitorList = database.list_documents(databaseId, colCompetitor, equalSessionId)['documents']
+  scoreList = database.list_documents(databaseId, colScore, equalSessionId)['documents']
+  deductionList = database.list_documents(databaseId, colDeduction, equalSessionId)['documents']
+  judgeList = database.list_documents(databaseId, colJudge, equalSessionId)['documents']
+
+  # get ids of judges
+  judgeIds_A = [judge['userId'] for judge in judgeList if judge['role'] == 'artistic']
+  judgeIds_E = [judge['userId'] for judge in judgeList if judge['role'] == 'execution']
+  judgeIds_D = [judge['userId'] for judge in judgeList if judge['role'] == 'difficulty']
+
+  out = []
+
+  for competitor in competitorList:
+      _id = competitor['$id']
+      number = competitor['number']
+      name = competitor['name']
+      city = competitor['city']
+      
+      scoreArtistic = getScore(scoreList, judgeIds_A, _id)
+      scoreExecution = getScore(scoreList, judgeIds_E, _id)
+      scoreDifficulty = getScore(scoreList, judgeIds_D, _id)
+      
+      meanArtistic = getMeanScore(scoreArtistic)
+      meanExecution = getMeanScore(scoreExecution)
+      meanDifficult = getMeanScore(scoreDifficulty)
+      
+      deduction = getDeduction(deductionList, arbitratorIds, _id)
+      total = getTotal(meanArtistic, meanExecution, meanDifficult, deduction)
+
+      out.append({
+          'number': number,
+          'name': name,
+          'city': city,
+          'scoreArtistic': scoreArtistic,
+          'meanArtistic': meanArtistic,
+          'scoreExecution': scoreExecution,
+          'meanExecution': meanExecution,
+          'scoreDifficulty': scoreDifficulty,
+          'meanDifficult': meanDifficult,
+          'deduction': deduction,
+          'total': total,
+      })
+
+  # sort by total
+  sortedOut = sorted(out, key=lambda d: d['total'], reverse=True)
+
+  # added place
+  place = 1
+  for x in sortedOut:
+      x['place'] = place
+      place += 1
+    
+  print(sortedOut)
+
   return res.json({
     "areDevelopersAwesome": True,
   })
