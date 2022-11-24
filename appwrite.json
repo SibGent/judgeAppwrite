@@ -47,20 +47,6 @@
             "timeout": 15
         },
         {
-            "$id": "637a2d4663bb10099195",
-            "name": "buildReport",
-            "runtime": "php-8.0",
-            "path": "functions/buildReport",
-            "entrypoint": "src/index.php",
-            "ignore": [
-                "vendor"
-            ],
-            "execute": [],
-            "events": [],
-            "schedule": "",
-            "timeout": 15
-        },
-        {
             "$id": "637b5e7c4342632f4101",
             "name": "batchJudgeCreate",
             "runtime": "php-8.0",
