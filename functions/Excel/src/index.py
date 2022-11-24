@@ -5,7 +5,9 @@ from appwrite.services.users import Users
 
 from appwrite.query import Query
 
-from .utils import *
+from .report import *
+
+# report.
 
 """
   'req' variable has:
@@ -37,6 +39,9 @@ def main(req, res):
       .set_self_signed(True)
     )
   
+  # init params
+  sessionId = '637f3fdab9bd8aea6ff9'
+  
   databaseId = '6361668457d4ac7662fe'
   colSession = '6361670a04b612e88077'
   colCompetitor = '63620f139fa54f3c5754'
@@ -44,12 +49,8 @@ def main(req, res):
   colDeduction = '6370d5eaf144b7909698'
   colJudge = '637aece8101af4477b11'
 
-  sessionId = '637b6e6709dc00c94feb'
-
   # read from database
   session = database.get_document(databaseId, colSession, sessionId)
-  judgeIds = session['judgeListIds']
-  arbitratorIds = session['arbitratorListIds']
 
   equalSessionId = [Query.equal('sessionId', sessionId)]
   competitorList = database.list_documents(databaseId, colCompetitor, equalSessionId)['documents']
@@ -57,54 +58,8 @@ def main(req, res):
   deductionList = database.list_documents(databaseId, colDeduction, equalSessionId)['documents']
   judgeList = database.list_documents(databaseId, colJudge, equalSessionId)['documents']
 
-  # get ids of judges
-  judgeIds_A = [judge['userId'] for judge in judgeList if judge['role'] == 'artistic']
-  judgeIds_E = [judge['userId'] for judge in judgeList if judge['role'] == 'execution']
-  judgeIds_D = [judge['userId'] for judge in judgeList if judge['role'] == 'difficulty']
-
-  out = []
-
-  for competitor in competitorList:
-      _id = competitor['$id']
-      number = competitor['number']
-      name = competitor['name']
-      city = competitor['city']
-      
-      scoreArtistic = getScore(scoreList, judgeIds_A, _id)
-      scoreExecution = getScore(scoreList, judgeIds_E, _id)
-      scoreDifficulty = getScore(scoreList, judgeIds_D, _id)
-      
-      meanArtistic = getMeanScore(scoreArtistic)
-      meanExecution = getMeanScore(scoreExecution)
-      meanDifficult = getMeanScore(scoreDifficulty)
-      
-      deduction = getDeduction(deductionList, arbitratorIds, _id)
-      total = getTotal(meanArtistic, meanExecution, meanDifficult, deduction)
-
-      out.append({
-          'number': number,
-          'name': name,
-          'city': city,
-          'scoreArtistic': scoreArtistic,
-          'meanArtistic': meanArtistic,
-          'scoreExecution': scoreExecution,
-          'meanExecution': meanExecution,
-          'scoreDifficulty': scoreDifficulty,
-          'meanDifficult': meanDifficult,
-          'deduction': deduction,
-          'total': total,
-      })
-
-  # sort by total
-  sortedOut = sorted(out, key=lambda d: d['total'], reverse=True)
-
-  # added place
-  place = 1
-  for x in sortedOut:
-      x['place'] = place
-      place += 1
-    
-  print(sortedOut)
+  data = get_report_data(session, competitorList, scoreList, deductionList, judgeList)
+  print(data)
 
   return res.json({
     "areDevelopersAwesome": True,
