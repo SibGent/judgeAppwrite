@@ -75,6 +75,20 @@
             "events": [],
             "schedule": "",
             "timeout": 15
+        },
+        {
+            "$id": "6385a2ebe5bd6b83458a",
+            "name": "skipCompetitor",
+            "runtime": "php-8.0",
+            "path": "functions/skipCompetitor",
+            "entrypoint": "src/index.php",
+            "ignore": [
+                "vendor"
+            ],
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15
         }
     ]
 }
