@@ -2,12 +2,12 @@ from appwrite.client import Client
 from appwrite.services.databases import Databases
 from appwrite.services.storage import Storage
 from appwrite.services.users import Users
+from appwrite.input_file import InputFile
 
 from appwrite.query import Query
 
 from .report import *
-
-# report.
+from .protocol import *
 
 """
   'req' variable has:
@@ -40,26 +40,25 @@ def main(req, res):
     )
   
   # init params
-  sessionId = '637f3fdab9bd8aea6ff9'
+  sessionId = str(req.payload)
   
   databaseId = '6361668457d4ac7662fe'
   colSession = '6361670a04b612e88077'
   colCompetitor = '63620f139fa54f3c5754'
   colScore = '636fb027bc44b3b389b4'
   colDeduction = '6370d5eaf144b7909698'
-  colJudge = '637aece8101af4477b11'
 
-  # read from database
+  # work it
   session = database.get_document(databaseId, colSession, sessionId)
 
-  equalSessionId = [Query.equal('sessionId', sessionId)]
+  equalSessionId = [Query.equal('sessionId', sessionId), Query.limit(100)]
   competitorList = database.list_documents(databaseId, colCompetitor, equalSessionId)['documents']
   scoreList = database.list_documents(databaseId, colScore, equalSessionId)['documents']
   deductionList = database.list_documents(databaseId, colDeduction, equalSessionId)['documents']
-  judgeList = database.list_documents(databaseId, colJudge, equalSessionId)['documents']
 
-  data = get_report_data(session, competitorList, scoreList, deductionList, judgeList)
-  print(data)
+  report_data = get_report_data(session, competitorList, scoreList, deductionList)
+  build_protocol('protocol.xlsx', report_data)
+  print('done')
 
   return res.json({
     "areDevelopersAwesome": True,

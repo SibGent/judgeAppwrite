@@ -11,14 +11,13 @@ def get_max_col(array):
     return count
 
 
-def get_score(score_list, judges, competitor_id):
+def get_score(score_list, judges_ids, competitor_id, judge_code='С'):
     result = {}
 
-    for judge in judges:
-        judge_id = judge['userId']
-        judge_number = judge['number']
-        key = f'C{judge_number}'
+    judge_number = 1
 
+    for judge_id in judges_ids:
+        key = f'{judge_code}{judge_number}'
         result[key] = 0.0
 
         for score in score_list:
@@ -26,23 +25,26 @@ def get_score(score_list, judges, competitor_id):
                 result[key] = score['value']
                 break
 
+        judge_number += 1
+
     return result
 
 
-def get_deduction(deduction_list, judges, arbitrator_ids, competitor_id):
+def get_deduction(deduction_list, judges_ids, arbitrator_ids, competitor_id, judge_code='С'):
     result = {}
 
-    for judge in judges:
-        judge_id = judge['userId']
-        judge_number = judge['number']
-        key = f'C{judge_number}'
+    judge_number = 1
 
+    for judge_id in judges_ids:
+        key = f'{judge_code}{judge_number}'
         result[key] = 0.0
 
         for score in deduction_list:
             if score['userId'] == judge_id and score['competitorId'] == competitor_id:
                 result[key] = score['value']
                 break
+
+        judge_number += 1
 
     arbitrator_index = 0
 
@@ -58,7 +60,6 @@ def get_deduction(deduction_list, judges, arbitrator_ids, competitor_id):
                 break
 
     return result
-
 
 def get_mean_score(score_list):
     score_sum = sum(score_list.values())

@@ -1,13 +1,12 @@
+import statistics
 from .utils import *
 
 
-def get_report_data(session, competitor_list, score_list, deduction_list, judge_list):
+def get_report_data(session, competitor_list, score_list, deduction_list):
     arbitrator_ids = session['arbitratorListIds']
-
-    # filter users by roles
-    judges_a = [judge for judge in judge_list if judge['role'] == 'artistic']
-    judges_e = [judge for judge in judge_list if judge['role'] == 'execution']
-    judges_d = [judge for judge in judge_list if judge['role'] == 'difficulty']
+    judges_a = session['judgeArtisticListIds']
+    judges_e = session['judgeExecutionListIds']
+    judges_d = session['judgeDifficultyListIds']
 
     data = []
 
@@ -17,13 +16,13 @@ def get_report_data(session, competitor_list, score_list, deduction_list, judge_
         name = competitor['name']
         city = competitor['city']
 
-        score_artistic = get_score(score_list, judges_a, _id)
-        score_execution = get_score(score_list, judges_e, _id)
-        score_difficulty = get_score(score_list, judges_d, _id)
+        score_artistic = get_score(score_list, judges_a, _id, 'А')
+        score_execution = get_score(score_list, judges_e, _id, 'И')
+        score_difficulty = get_score(score_list, judges_d, _id, 'С')
 
-        mean_artistic = get_mean_score(score_artistic)
-        mean_execution = get_mean_score(score_execution)
-        mean_difficult = get_mean_score(score_difficulty)
+        mean_artistic = statistics.median(score_artistic.values())
+        mean_execution = statistics.median(score_execution.values())
+        mean_difficult = statistics.median(score_difficulty.values())
 
         deduction = get_deduction(deduction_list, judges_d, arbitrator_ids, _id)
         sum_deduction = get_sum_deduction(deduction)
