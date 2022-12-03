@@ -55,11 +55,13 @@ def main(req, res):
   competitorList = database.list_documents(databaseId, colCompetitor, equalSessionId)['documents']
   scoreList = database.list_documents(databaseId, colScore, equalSessionId)['documents']
   deductionList = database.list_documents(databaseId, colDeduction, equalSessionId)['documents']
-
+  
+  bucketId = '637922611c551cb7d2fb'
   report_data = get_report_data(session, competitorList, scoreList, deductionList)
   build_protocol('protocol.xlsx', report_data)
-  print('done')
-
+  file_meta = storage.create_file(bucketId, 'unique()', InputFile.from_path('protocol.xlsx'))
+  
   return res.json({
-    "areDevelopersAwesome": True,
+    "bucketId": bucketId,
+    "fileId": file_meta['$id'],
   })
