@@ -61,7 +61,4 @@ def main(req, res):
   build_protocol('protocol.xlsx', report_data)
   file_meta = storage.create_file(bucketId, 'unique()', InputFile.from_path('protocol.xlsx'))
   
-  return res.json({
-    "bucketId": bucketId,
-    "fileId": file_meta['$id'],
-  })
+  return res.json(file_meta)
