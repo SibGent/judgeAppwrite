@@ -68,7 +68,7 @@ return function($req, $res) {
   $competitors = [];
   try {
     foreach ($lines as $line) {
-      $data = str_getcsv($line);
+      $data = str_getcsv($line, ';');
       if (count($data) < 4) {
         continue;
       }
