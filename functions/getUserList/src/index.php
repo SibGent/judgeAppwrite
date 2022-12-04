@@ -1,6 +1,8 @@
 <?php
 
 use Appwrite\Client;
+use Appwrite\Query;
+use Appwrite\Services\Databases;
 use Appwrite\Services\Users;
 
 require_once 'vendor/autoload.php';
@@ -21,6 +23,7 @@ require_once 'vendor/autoload.php';
 return function($req, $res) {
   $client = new Client();
   $users = new Users($client);
+  $database = new Databases($client);
 
   if(!$req['variables']['APPWRITE_FUNCTION_ENDPOINT'] || !$req['variables']['APPWRITE_FUNCTION_API_KEY']) {
     echo('Environment variables are not set. Function cannot use Appwrite SDK.');
@@ -32,13 +35,31 @@ return function($req, $res) {
       ->setSelfSigned(true);
   }
 
+  $databaseId = '6361668457d4ac7662fe';
+  $colMeta = '63848772123ad6bd5baa';
+  
+  $userIds = [];
   $userList = [];
-
-  $result = $users->list();
-  foreach ($result['users'] as $user) {
+  
+  $result = $users->list([Query::limit(100)])['users'];
+  
+  foreach ($result as $user) {
+      $userIds[] = $user['$id'];
+  }
+  
+  $meta = $database->listDocuments($databaseId, $colMeta, [
+    Query::equal('$id', $userIds),
+    Query::limit(100),
+  ])['documents'];
+  
+  
+  foreach ($meta as $user) {
     $userList[] = [
       'id' => $user['$id'],
+      'surname' => $user['surname'],
       'name' => $user['name'],
+      'patronymic' => $user['patronymic'],
+      'region' => $user['region'],
     ];
   }
 
