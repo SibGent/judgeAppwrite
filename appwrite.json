@@ -11,7 +11,9 @@
             "ignore": [
                 "vendor"
             ],
-            "execute": [],
+            "execute": [
+                "any"
+            ],
             "events": [],
             "schedule": "",
             "timeout": 15
@@ -25,7 +27,9 @@
             "ignore": [
                 "vendor"
             ],
-            "execute": [],
+            "execute": [
+                "any"
+            ],
             "events": [
                 "databases.6361668457d4ac7662fe.collections.6361670a04b612e88077.documents.*.create"
             ],
@@ -41,7 +45,9 @@
             "ignore": [
                 "vendor"
             ],
-            "execute": [],
+            "execute": [
+                "any"
+            ],
             "events": [],
             "schedule": "",
             "timeout": 15
@@ -71,7 +77,9 @@
             "ignore": [
                 "__pypackages__"
             ],
-            "execute": [],
+            "execute": [
+                "any"
+            ],
             "events": [],
             "schedule": "",
             "timeout": 15
@@ -85,7 +93,9 @@
             "ignore": [
                 "vendor"
             ],
-            "execute": [],
+            "execute": [
+                "any"
+            ],
             "events": [],
             "schedule": "",
             "timeout": 15

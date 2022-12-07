@@ -40,8 +40,18 @@ return function($req, $res) {
   
   $userIds = [];
   $userList = [];
+
+  $payload = $req['payload'];
+  $searchIds = json_decode($payload, true);
+  $filter = [Query::limit(100)];
+  if ($searchIds != null) {
+    $filter = [
+      Query::limit(100),
+      Query::equal('$id', $searchIds),
+    ];
+  }
   
-  $result = $users->list([Query::limit(100)])['users'];
+  $result = $users->list($filter)['users'];
   
   foreach ($result as $user) {
       $userIds[] = $user['$id'];
