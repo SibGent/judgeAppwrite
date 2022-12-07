@@ -47,6 +47,7 @@ def main(req, res):
   colCompetitor = '63620f139fa54f3c5754'
   colScore = '636fb027bc44b3b389b4'
   colDeduction = '6370d5eaf144b7909698'
+  colMeta = '63848772123ad6bd5baa'
 
   # work it
   session = database.get_document(databaseId, colSession, sessionId)
@@ -55,10 +56,15 @@ def main(req, res):
   competitorList = database.list_documents(databaseId, colCompetitor, equalSessionId)['documents']
   scoreList = database.list_documents(databaseId, colScore, equalSessionId)['documents']
   deductionList = database.list_documents(databaseId, colDeduction, equalSessionId)['documents']
+  main_judge = database.get_document(databaseId, colMeta, session['mainJudgeId'])
+  secretary = database.list_documents(databaseId, colMeta, [Query.equal('$id', session['secretaryListIds']), Query.limit(1)])['documents'][0]
+
+  judge_name = f'{main_judge["surname"]} {main_judge["name"]} {main_judge["patronymic"]} ({main_judge["region"]})'
+  secretary_name = f'{secretary["surname"]} {secretary["name"]} {secretary["patronymic"]} ({main_judge["region"]})'
   
   bucketId = '637922611c551cb7d2fb'
   report_data = get_report_data(session, competitorList, scoreList, deductionList)
-  build_protocol('protocol.xlsx', report_data)
+  build_protocol('protocol.xlsx', report_data, judge_name, secretary_name)
   file_meta = storage.create_file(bucketId, 'unique()', InputFile.from_path('protocol.xlsx'))
   
   return res.json(file_meta)

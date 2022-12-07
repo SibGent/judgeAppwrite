@@ -2,7 +2,7 @@ import xlsxwriter
 from .utils import *
 
 
-def build_protocol(filename, sorted_data):
+def build_protocol(filename, sorted_data, judge_name, secretary_name):
     # xlsx config
     workbook = xlsxwriter.Workbook(filename)
     worksheet = workbook.add_worksheet()
@@ -147,6 +147,19 @@ def build_protocol(filename, sorted_data):
     worksheet.set_column('A:A', number_column_width)
     worksheet.set_column('B:B', name_column_width)
     worksheet.set_column('C:C', city_column_width)
+    
+    # bottom sign
+    sign_mid_style = workbook.add_format({'align': 'center', 'valign': 'bottom', 'font_size': 12})
+    sign_left_style = workbook.add_format({'align': 'right', 'valign': 'bottom', 'font_size': 12})
+    sign_right_style = workbook.add_format({'align': 'left', 'valign': 'bottom', 'font_size': 12})
+    mid = col_next//2
+
+    worksheet.write(row_max + 5, mid, '___________________', sign_mid_style)
+    worksheet.write(row_max + 7, mid, '___________________', sign_mid_style)
+    worksheet.write(row_max + 5, mid - 2, 'Главный судья соревнований', sign_left_style)
+    worksheet.write(row_max + 7, mid - 2, 'Главный секретарь соревнований', sign_left_style)
+    worksheet.write(row_max + 5, mid + 2, judge_name, sign_right_style)
+    worksheet.write(row_max + 7, mid + 2, secretary_name, sign_right_style)
 
     # write all
     workbook.close()
