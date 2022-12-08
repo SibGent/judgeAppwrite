@@ -1,3 +1,20 @@
+from datetime import date
+
+
+def get_protocol_name(sorted_data):
+    d1 = date.today().strftime("%Y_%m_%d")
+
+    suffix = 0
+    for x in sorted_data:
+        if x['total'] != 0:
+            suffix += 1
+
+    if suffix == len(sorted_data):
+        suffix = 'final'
+
+    return f'protocol_{d1}_{suffix}.xlsx'
+
+
 def get_max_col(array):
     count = 0
 

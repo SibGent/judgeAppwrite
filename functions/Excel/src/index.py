@@ -43,6 +43,7 @@ def main(req, res):
   sessionId = str(req.payload)
   
   databaseId = '6361668457d4ac7662fe'
+  bucketId = '637922611c551cb7d2fb'
   colSession = '6361670a04b612e88077'
   colCompetitor = '63620f139fa54f3c5754'
   colScore = '636fb027bc44b3b389b4'
@@ -62,9 +63,9 @@ def main(req, res):
   judge_name = f'{main_judge["surname"]} {main_judge["name"]} {main_judge["patronymic"]} ({main_judge["region"]})'
   secretary_name = f'{secretary["surname"]} {secretary["name"]} {secretary["patronymic"]} ({main_judge["region"]})'
   
-  bucketId = '637922611c551cb7d2fb'
   report_data = get_report_data(session, competitorList, scoreList, deductionList)
-  build_protocol('protocol.xlsx', report_data, judge_name, secretary_name)
-  file_meta = storage.create_file(bucketId, 'unique()', InputFile.from_path('protocol.xlsx'))
+  protocol_name = get_protocol_name(report_data)
+  build_protocol(protocol_name, report_data, judge_name, secretary_name)
+  file_meta = storage.create_file(bucketId, 'unique()', InputFile.from_path(protocol_name))
   
   return res.json(file_meta)
